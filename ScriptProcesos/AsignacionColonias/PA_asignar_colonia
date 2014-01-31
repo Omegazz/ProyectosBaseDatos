@@ -1,0 +1,56 @@
+-- =================================================
+-- Autor: Stephan Endres, Diego Salas
+-- Resumen: Asigna las colonias de forma aleatoria a cada jugador
+-- Fecha creacion: 20/08/2013
+-- Fecha modificacion:29/01/2014
+-- =================================================
+create or replace PROCEDURE PA_ASIGNA_COLONIA
+IS
+ 
+v_jugador jugador.id_jugador%type;
+v_num_Random number;
+v_existe number;
+v_cont number;
+ 
+cursor c_jugadores is
+  select id_jugador from jugador;
+ 
+BEGIN
+
+	open c_jugadores;
+
+	loop
+		fetch c_jugadores into v_jugador;
+		exit when c_jugadores%NOTFOUND;
+
+		v_cont := 0;
+
+		loop
+
+			v_num_Random := myrand(1,40);
+
+			select case when exists(select 1 from colonia_asignada where id_colonia = v_num_Random) then 1 else 0 end into
+			v_existe from dual;
+			
+			if v_existe = 0 then
+
+				v_cont := v_cont +1;
+			
+				insert into colonia_asignada values(v_jugador,v_num_Random);    
+				
+			end if;
+
+
+		exit when v_cont = 8;
+		end loop;
+
+	end loop;
+
+	close c_jugadores;
+
+	commit;
+
+	dbms_output.put_line('listo');
+ 
+END PA_ASIGNA_COLONIA;
+/
